@@ -1,0 +1,81 @@
+[
+  {
+    "date": "2019-06-25",
+    "price": "294",
+    "departureBuses": {
+      "324": {
+        "price": "30",
+        "divisionPropertyId": 1359136
+      }
+    },
+    "returnBuses": {
+      "324": {
+        "price": "30",
+        "divisionPropertyId": 1359136
+      }
+    },
+    "divisionPropertyId": 1367136
+  },
+  {
+    "date": "2019-06-26",
+    "price": "303",
+    "departureBuses": {
+      "324": {
+        "price": "30",
+        "divisionPropertyId": 1359136
+      }
+    },
+    "returnBuses": {
+      "324": null
+    },
+    "divisionPropertyId": 1368036
+  },
+  {
+    "date": "2019-06-27",
+    "price": "322",
+    "departureBuses": {
+      "324": {
+        "price": "30",
+        "divisionPropertyId": 1359136
+      }
+    },
+    "returnBuses": {
+      "324": {
+        "price": "30",
+        "divisionPropertyId": 1359136
+      }
+    },
+    "divisionPropertyId": 1368936
+  },
+  {
+    "date": "2019-06-28",
+    "price": "318",
+    "departureBuses": {
+      "324": {
+        "price": "30",
+        "divisionPropertyId": 1359136
+      }
+    },
+    "returnBuses": {
+      "324": {
+        "price": "30",
+        "divisionPropertyId": 1359136
+      }
+    },
+    "divisionPropertyId": 1368936
+  },
+  {
+    "date": "2019-06-29",
+    "price": "303",
+    "departureBuses": {
+      "324": {
+        "price": "30",
+        "divisionPropertyId": 1359136
+      }
+    },
+    "returnBuses": {
+      "324": null
+    },
+    "divisionPropertyId": 1368036
+  }
+]
