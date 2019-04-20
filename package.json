@@ -1,0 +1,19 @@
+{
+  "name": "worker-communication-benchmarks",
+  "version": "1.0.0",
+  "description": "Benchmarks of communicating with Worker Threads in Node.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jaksosoftware/node-worker-communication-benchmarks.git"
+  },
+  "author": "Olli Salli <ollisal@users.noreply.github.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jaksosoftware/node-worker-communication-benchmarks/issues"
+  },
+  "homepage": "https://github.com/jaksosoftware/node-worker-communication-benchmarks#readme"
+}
