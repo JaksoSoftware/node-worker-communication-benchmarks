@@ -9,7 +9,8 @@ module.exports = [
 ].reduce((data, name) => ({
   ...data,
   [name]: {
-    asJSONString: fs.readFileSync(path.join(__dirname, `${name}.json`)),
-    asArray: require(`./${name}.json`)
+    asJSONByteArray: fs.readFileSync(path.join(__dirname, `${name}.json`), { encoding: null }),
+    asJSONString: fs.readFileSync(path.join(__dirname, `${name}.json`), { encoding: 'utf-8' }),
+    asParsedObjects: require(`./${name}.json`)
   }
 }), {})

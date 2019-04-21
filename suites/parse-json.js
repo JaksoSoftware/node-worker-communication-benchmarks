@@ -11,13 +11,23 @@ module.exports = Object.entries(allData).reduce((suites, [ size, data ]) => {
   return [
     ...suites,
     new Suite(`Parse ${prettierBytes(totalSize)} of ${size} ${prettierBytes(byteSize)} JSON strings`)
-      .add('in main thread', () => {
+      .add('in main thread, from JSON byte array', () => {
+        for (let i = 0; i < times; ++i) {
+          const parsed = JSON.parse(data.asJSONByteArray)
+          verifyResult(parsed)
+        }
+      })
+      .add('in main thread, from JSON string', () => {
         for (let i = 0; i < times; ++i) {
           const parsed = JSON.parse(data.asJSONString)
-          if (parsed.length !== data.asArray.length) {
-            throw new Error('unexpected result length')
-          }
+          verifyResult(parsed)
         }
       })
   ]
+
+  function verifyResult(parsed) {
+    if (parsed.length !== data.asParsedObjects.length) {
+      throw new Error('unexpected result length')
+    }
+  }
 }, [])
