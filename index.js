@@ -6,7 +6,7 @@ function runSuites(suites) {
   if (suites.length > 0) {
     const [suite, ...followingSuites] = suites
     suite
-      .on('start', (event) => {
+      .on('start', () => {
         console.log(suite.name)
       })
       .on('cycle', event => {
