@@ -1,16 +1,22 @@
-const suites = require('./suites')
+const allSuites = require('./suites')
 
-for (const suite of suites) {
-  suite
-    .on('start', (event) => {
-      console.log(suite.name)
-    })
-    .on('cycle', event => {
-      console.log('  ', String(event.target))
-    })
-    .on('complete', () => {
-      console.log('Fastest is ' + suite.filter('fastest').map('name'))
-      console.log('---')
-    })
-    .run()
+runSuites(allSuites)
+
+function runSuites(suites) {
+  if (suites.length > 0) {
+    const [suite, ...followingSuites] = suites
+    suite
+      .on('start', (event) => {
+        console.log(suite.name)
+      })
+      .on('cycle', event => {
+        console.log('  ', String(event.target))
+      })
+      .on('complete', () => {
+        console.log('Fastest is ' + suite.filter('fastest').map('name'))
+        console.log('---')
+        process.nextTick(() => runSuites(followingSuites))
+      })
+      .run()
+  }
 }
