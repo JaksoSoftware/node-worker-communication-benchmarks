@@ -42,6 +42,22 @@ module.exports = Object.entries(allData).reduce((suites, [ size, data ]) => {
         }
         deferred.resolve()
       }, { defer: true })
+      .add('in single worker thread, from copied JSON string, pipelined', deferred => {
+        let repliesReceived = 0
+
+        for (let i = 0; i < times; ++i) {
+          worker.postMessage(data.asJSONString)
+        }
+        worker.on('message', receiveReply)
+
+        function receiveReply(parsed) {
+          verifyResult(parsed)
+          if (++repliesReceived === times) {
+            worker.off('message', receiveReply)
+            deferred.resolve()
+          }
+        }
+      }, { defer: true })
       .on('complete', () => {
         worker.unref()
         worker = null
