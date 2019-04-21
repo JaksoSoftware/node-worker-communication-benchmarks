@@ -6,11 +6,20 @@ module.exports = [
   'medium',
   'large',
   'huge'
-].reduce((data, name) => ({
-  ...data,
-  [name]: {
-    asJSONByteArray: fs.readFileSync(path.join(__dirname, `${name}.json`), { encoding: null }),
-    asJSONString: fs.readFileSync(path.join(__dirname, `${name}.json`), { encoding: 'utf-8' }),
-    asParsedObjects: require(`./${name}.json`)
-  }
-}), {})
+].reduce((data, name) => {
+  const jsonBuffer = fs.readFileSync(path.join(__dirname, `${name}.json`), { encoding: null })
+
+  const sharedArrayBuffer = new SharedArrayBuffer(jsonBuffer.length)
+  const sharedByteArray = new Uint8Array(sharedArrayBuffer)
+  jsonBuffer.copy(sharedByteArray)
+
+  return ({
+    ...data,
+    [name]: {
+      asJSONBuffer: jsonBuffer,
+      asJSONString: jsonBuffer.toString(),
+      asSharedJSONArray: sharedByteArray,
+      asParsedObjects: require(`./${name}.json`)
+    }
+  })
+}, {})

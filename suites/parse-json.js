@@ -18,9 +18,9 @@ module.exports = Object.entries(allData).reduce((suites, [ size, data ]) => {
       .on('start', () => {
         worker = new Worker('./workers/parse-json.js')
       })
-      .add('in main thread, from JSON byte array', () => {
+      .add('in main thread, from JSON byte buffer', () => {
         for (let i = 0; i < times; ++i) {
-          const parsed = JSON.parse(data.asJSONByteArray)
+          const parsed = JSON.parse(data.asJSONBuffer)
           verifyResult(parsed)
         }
       })
@@ -47,6 +47,22 @@ module.exports = Object.entries(allData).reduce((suites, [ size, data ]) => {
 
         for (let i = 0; i < times; ++i) {
           worker.postMessage(data.asJSONString)
+        }
+        worker.on('message', receiveReply)
+
+        function receiveReply(parsed) {
+          verifyResult(parsed)
+          if (++repliesReceived === times) {
+            worker.off('message', receiveReply)
+            deferred.resolve()
+          }
+        }
+      }, { defer: true })
+      .add('in single worker thread, with JSON in SharedArrayBuffer, pipelined', deferred => {
+        let repliesReceived = 0
+
+        for (let i = 0; i < times; ++i) {
+          worker.postMessage(data.asSharedJSONArray)
         }
         worker.on('message', receiveReply)
 
