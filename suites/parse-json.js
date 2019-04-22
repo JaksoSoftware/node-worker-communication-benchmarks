@@ -21,18 +21,36 @@ module.exports = Object.entries(allData).reduce((suites, [ size, data ]) => {
           workers.push(new Worker('./workers/parse-json.js'))
         }
       })
-      .add('in main thread, from JSON byte buffer', () => {
-        for (let i = 0; i < times; ++i) {
+      .add('in main thread, from JSON byte buffer', deferred => {
+        let timesParsed = 0
+        doRemainingParses()
+
+        function doRemainingParses() {
           const parsed = JSON.parse(data.asJSONBuffer)
           verifyResult(parsed)
+
+          if (++timesParsed === times) {
+            deferred.resolve()
+          } else {
+            setImmediate(doRemainingParses)
+          }
         }
-      })
-      .add('in main thread, from JSON string', () => {
-        for (let i = 0; i < times; ++i) {
-          const parsed = JSON.parse(data.asJSONString)
+      }, { defer: true })
+      .add('in main thread, from JSON string', deferred => {
+        let timesParsed = 0
+        doRemainingParses()
+
+        function doRemainingParses() {
+          const parsed = JSON.parse(data.asJSONBuffer)
           verifyResult(parsed)
+
+          if (++timesParsed === times) {
+            deferred.resolve()
+          } else {
+            setImmediate(doRemainingParses)
+          }
         }
-      })
+      }, { defer: true })
       .add('in single worker thread, from copied JSON string, one at a time', async deferred => {
         for (let i = 0; i < times; ++i) {
           workers[0].postMessage(data.asJSONString)
