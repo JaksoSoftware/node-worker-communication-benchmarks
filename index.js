@@ -13,7 +13,7 @@ function runSuites(suites) {
         console.log('  ', String(event.target))
       })
       .on('complete', () => {
-        console.log('Fastest is ' + suite.filter('fastest').map('name'))
+        console.log('Fastest is ' + suite.filter('fastest').map('name').join(' or '))
         console.log('---')
         process.nextTick(() => runSuites(followingSuites))
       })
