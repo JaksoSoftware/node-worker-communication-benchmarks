@@ -111,6 +111,17 @@ module.exports = Object.entries(allData).reduce((suites, [ size, data ]) => {
           }
         }
       }, { defer: true })
+      // .add('using workerify asyncParseJSON', async deferred => {
+      //   await Promise.all(
+      //     new Array(times)
+      //       .fill()
+      //       .map(async () => {
+      //         const parsed = await asyncParseJSON(data.asJSONString)
+      //         verifyResult(parsed)
+      //       })
+      //   )
+      //   deferred.resolve()
+      // }, { defer: true })
       .on('complete', () => {
         workers.forEach(worker => worker.unref())
         workers.length = 0
