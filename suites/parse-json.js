@@ -1,5 +1,6 @@
 const { Worker } = require('worker_threads')
 const os = require('os')
+const events = require('events')
 
 const { Suite } = require('benchmark')
 const prettierBytes = require('prettier-bytes')
@@ -54,12 +55,8 @@ module.exports = Object.entries(allData).reduce((suites, [ size, data ]) => {
       .add('in single worker thread, from copied JSON string, one at a time', async deferred => {
         for (let i = 0; i < times; ++i) {
           workers[0].postMessage(data.asJSONString)
-          await new Promise(resolve => {
-            workers[0].once('message', parsed => {
-              verifyResult(parsed)
-              resolve()
-            })
-          })
+          const [ parsed ] = await events.once(workers[0], 'message')
+          verifyResult(parsed)
         }
         deferred.resolve()
       }, { defer: true })
@@ -129,8 +126,9 @@ module.exports = Object.entries(allData).reduce((suites, [ size, data ]) => {
   ]
 
   function verifyResult(parsed) {
-    if (parsed.length !== data.asParsedObjects.length) {
-      throw new Error('unexpected result length')
+    const expectedLength = data.asParsedObjects.length
+    if (parsed.length !== expectedLength) {
+      throw new Error(`unexpected result length ${parsed.length} !== ${expectedLength}`)
     }
   }
 }, [])
