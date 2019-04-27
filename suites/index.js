@@ -1,3 +1,4 @@
 module.exports = [
-  ...require('./parse-json')
+  ...require('./parse-json'),
+  ...require('./json-stringify')
 ]

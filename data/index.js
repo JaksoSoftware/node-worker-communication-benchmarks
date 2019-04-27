@@ -13,13 +13,16 @@ module.exports = [
   const sharedByteArray = new Uint8Array(sharedArrayBuffer)
   jsonBuffer.copy(sharedByteArray)
 
+  const asParsedObjects = JSON.parse(jsonBuffer)
+
   return ({
     ...data,
     [name]: {
       asJSONBuffer: jsonBuffer,
-      asJSONString: jsonBuffer.toString(),
+      asPrettyJSONString: jsonBuffer.toString(),
+      asCompactJSONString: JSON.stringify(asParsedObjects),
       asSharedJSONArray: sharedByteArray,
-      asParsedObjects: require(`./${name}.json`)
+      asParsedObjects
     }
   })
 }, {})

@@ -6,9 +6,10 @@ const { Suite } = require('benchmark')
 const prettierBytes = require('prettier-bytes')
 
 const allData = require('../data')
+const { callNTimesWithSetImmediate } = require('../utils')
 
 module.exports = Object.entries(allData).map(([ size, data ]) => {
-  const byteSize = data.asJSONString.length
+  const byteSize = data.asPrettyJSONString.length
   const times = Math.round((10 * 1024 * 1024) / byteSize)
   const totalSize = times * byteSize
 
@@ -29,14 +30,14 @@ module.exports = Object.entries(allData).map(([ size, data ]) => {
     }, { defer: true })
     .add('in main thread, from JSON string', async deferred => {
       await callNTimesWithSetImmediate(times, () => {
-        const parsed = JSON.parse(data.asJSONString)
+        const parsed = JSON.parse(data.asPrettyJSONString)
         verifyResult(parsed)
       })
       deferred.resolve()
     }, { defer: true })
     .add('in single worker thread, from copied JSON string, one at a time', async deferred => {
       for (let i = 0; i < times; ++i) {
-        workers[0].postMessage(data.asJSONString)
+        workers[0].postMessage(data.asPrettyJSONString)
         const [ parsed ] = await events.once(workers[0], 'message')
         verifyResult(parsed)
       }
@@ -47,7 +48,7 @@ module.exports = Object.entries(allData).map(([ size, data ]) => {
       workers[0].on('message', receiveReply)
 
       callNTimesWithSetImmediate(times, () => {
-        workers[0].postMessage(data.asJSONString)
+        workers[0].postMessage(data.asPrettyJSONString)
       })
 
       function receiveReply(parsed) {
@@ -95,7 +96,7 @@ module.exports = Object.entries(allData).map(([ size, data ]) => {
     //     new Array(times)
     //       .fill()
     //       .map(async () => {
-    //         const parsed = await asyncParseJSON(data.asJSONString)
+    //         const parsed = await asyncParseJSON(data.asPrettyJSONString)
     //         verifyResult(parsed)
     //       })
     //   )
@@ -113,18 +114,3 @@ module.exports = Object.entries(allData).map(([ size, data ]) => {
     }
   }
 }, [])
-
-async function callNTimesWithSetImmediate(n, workFn) {
-  await new Promise(resolve => {
-    callNFurtherTimes(n)
-
-    function callNFurtherTimes(nCallsRemaining) {
-      if (nCallsRemaining >= 1) {
-        workFn(nCallsRemaining)
-        setImmediate(callNFurtherTimes, nCallsRemaining - 1)
-      } else {
-        resolve()
-      }
-    }
-  })
-}
