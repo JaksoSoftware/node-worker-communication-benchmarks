@@ -80,7 +80,7 @@ module.exports = Object.entries(allData).map(([ size, data ]) => {
       workers.forEach(worker => worker.on('message', receiveReply))
 
       callNTimesWithSetImmediate(times, nCallsRemaining => {
-        workers[nCallsRemaining % workers.length].postMessage(data.asSharedJSONArray)
+        workers[nCallsRemaining % workers.length].postMessage(data.asPrettyJSONString)
       })
 
       function receiveReply(parsed) {
