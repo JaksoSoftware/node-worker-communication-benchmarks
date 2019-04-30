@@ -1,29 +1,31 @@
 const { Worker } = require('worker_threads')
 
 const { Suite } = require('benchmark')
-const prettierBytes = require('prettier-bytes')
 
 const allData = require('../data')
 const { callNTimesWithSetImmediate } = require('../utils')
+const { countWithin } = require('../utils')
 
 module.exports = Object.entries(allData).map(([ size, data ]) => {
-  const byteSize = data.asPrettyJSONString.length
+  const byteSize = data.asCompactJSONString.length
   const times = Math.round((10 * 1024 * 1024) / byteSize)
-  const totalSize = times * byteSize
 
-  let blackHoleWorker = null, stringSenderWorker = null
+  const numArrays = countWithin(data.asParsedObjects, val => val instanceof Array)
+  const numObjects = countWithin(data.asParsedObjects, val => !!val && typeof val === 'object' && !(val instanceof Array))
 
-  return new Suite(`postMessage ${prettierBytes(totalSize)} of ${size} ${prettierBytes(byteSize)} JSON strings`)
+  let blackHoleWorker = null, objSenderWorker = null
+
+  return new Suite(`postMessage ${times} values with ${numArrays} arrays and ${numObjects} objects within each`)
     .on('start', () => {
       blackHoleWorker = new Worker('./workers/black-hole.js')
-      stringSenderWorker = new Worker('./workers/send-back-workerdata.js', { workerData: data.asPrettyJSONString })
+      objSenderWorker = new Worker('./workers/send-back-workerdata.js', { workerData: data.asParsedObjects })
     })
     .add('from main to worker thread', deferred => {
       let repliesReceived = 0
       blackHoleWorker.on('message', receiveReply)
 
       callNTimesWithSetImmediate(times, () => {
-        blackHoleWorker.postMessage(data.asPrettyJSONString)
+        blackHoleWorker.postMessage(data.asParsedObjects)
       })
 
       function receiveReply() {
@@ -35,21 +37,21 @@ module.exports = Object.entries(allData).map(([ size, data ]) => {
     }, { defer: true })
     .add('from worker to main thread', deferred => {
       let repliesReceived = 0
-      stringSenderWorker.on('message', receiveReply)
+      objSenderWorker.on('message', receiveReply)
 
       callNTimesWithSetImmediate(times, () => {
-        stringSenderWorker.postMessage(null)
+        objSenderWorker.postMessage(null)
       })
 
       function receiveReply() {
         if (++repliesReceived === times) {
-          stringSenderWorker.off('message', receiveReply)
+          objSenderWorker.off('message', receiveReply)
           deferred.resolve()
         }
       }
     }, { defer: true })
     .on('complete', () => {
       blackHoleWorker.unref()
-      stringSenderWorker.unref()
+      objSenderWorker.unref()
     })
 })
